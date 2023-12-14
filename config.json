@@ -1,0 +1,11 @@
+{
+    "invalid_node_name": ["剩余流量", "套餐到期", "距离下次"],
+    "pass_group": ["🎯 全球直连", "🛑 全球拦截", "🍃 应用净化"],
+    "sample_path": "./samples/sample.yaml",
+    "sample_url": "https://raw.njuu.cf/veeyoung/somescripts/main/sample.yaml",
+    "output_path": "default",
+    "secret": true,
+    "authentication": false,
+    "allow_insecure_node": true,
+    "keep_dulplicate": true
+}
