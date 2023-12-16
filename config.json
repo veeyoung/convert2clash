@@ -7,5 +7,6 @@
     "secret": true,
     "authentication": false,
     "allow_insecure_node": true,
-    "keep_dulplicate": true
+    "keep_dulplicate": true,
+    "backup": false
 }

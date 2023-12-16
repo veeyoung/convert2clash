@@ -113,6 +113,11 @@ if __name__ == '__main__':
         output_path = converter_config['output_path']
     if args_dict.get('output_path') is not None:
         output_path = args_dict['output_path']
+    if converter_config.get('backup') == True and os.path.exists(output_path):
+        if not os.path.exists('backup'):
+            os.mkdir('backup')
+        os.rename(output_path, os.path.join('backup', str(int(datetime.datetime.now().timestamp())) + os.path.basename(output_path)))
+
 
     # 获取配置文件
     config_sample = load_local_config(sample_path)
