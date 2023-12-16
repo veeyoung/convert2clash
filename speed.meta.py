@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, sys, requests
+import os, sys, requests, json
 from confProcessor import load_local_config, clash_use_new_config, save_config
 
 if __name__ == '__main__':
@@ -22,10 +22,12 @@ if __name__ == '__main__':
 
     latency = dict()
     for i, j in response_clash.json()['proxies'].items():
-        if j['type'] == 'Selector' or j['alive'] == False:
+        if j.get('all') is not None or j['alive'] == False or len(j['history']) == 0:
             continue
-        if len(j['history']) > 0 and j['history'][-1]['meanDelay'] > 0:
-            latency[i] = j['history'][-1]['meanDelay']
+        delay = j['history'][-1].get('meanDelay') if j['history'][-1].get('meanDelay') is not None \
+        else j['history'][-1].get('delay')
+        if delay > 0:
+            latency[i] = delay
 
     # 删除原来的节点
     pass_group = []
