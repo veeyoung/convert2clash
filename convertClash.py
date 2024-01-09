@@ -6,16 +6,15 @@ import os, sys, json, base64, datetime
 import requests, yaml
 import argparse
 
-from nodeParser import *
+from nodeParser import ConvertsV2Ray
 from confProcessor import *
 
-supported_nodes = ['vmess://', 'ss://', 'ssr://', 'trojan://']
+supported_nodes = ['vmess://', 'ss://', 'ssr://', 'trojan://', 'vless://', 'hysteria://', 'hysteria2://', 'hy2://', 'tuic://', 'tg://']
 
 
 def log(msg):
     time = datetime.datetime.now()
     print('[' + time.strftime('%Y.%m.%d-%H:%M:%S') + '] ' + msg)
-
 
 # 获取节点:
 def get_proxies_recursive(urls):
@@ -23,7 +22,7 @@ def get_proxies_recursive(urls):
         return None
     url_list = urls.split(';')
     headers = {
-        'User-Agent': 'Clash'
+        'User-Agent': 'V2ray'
     }
     proxy_list = list()
     for url in url_list:
@@ -44,8 +43,7 @@ def get_proxies_recursive(urls):
             except FileNotFoundError:
                 log('本地节点{}导入失败'.format(url))
                 continue
-
-        if not any(inputnode.find(node_type) > -1 for node_type in supported_nodes):
+        if all(inputnode.find(node_type) == -1 for node_type in supported_nodes):
             try:
                 yml = yaml.load(inputnode, Loader=yaml.FullLoader)
                 tmp_list = yml.get('proxies')
@@ -62,25 +60,11 @@ def get_proxies_recursive(urls):
                 tmp_list = get_proxies_recursive(inputnode)
                 proxy_list.extend(tmp_list)
                 continue
-
-        nodes_list = inputnode.splitlines()
-        for node in nodes_list:
-            name = node[:node.find('://')]
-            if name is None:
-                continue
-            if name == 'vmess':
-                clash_node = v2ray_to_clash(node)
-            elif name == 'ss':
-                clash_node = ss_to_clash(node)
-            elif name == 'ssr':
-                clash_node = ssr_to_clash(node)
-            elif name == 'trojan':
-                clash_node = trojan_to_clash(node)
-            else:
-                continue
-            if clash_node is None:
-                continue
-            proxy_list.append(clash_node)
+        try:
+            clash_nodes = ConvertsV2Ray(inputnode)
+            proxy_list.extend(clash_nodes)
+        except:
+            log('订阅链接{}不包含节点'.format(url))
 
     return proxy_list
 
@@ -122,7 +106,7 @@ if __name__ == '__main__':
     if config_sample is None:
         log('获取网络配置文件失败')
         sys.exit(1)
-    
+
     input_urls = input('请输入文件名或订阅地址(多个用;隔开):')
     node_list = get_proxies_recursive(input_urls)
     if node_list is None or len(node_list) == 0:
