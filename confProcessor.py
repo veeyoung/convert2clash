@@ -111,5 +111,10 @@ def clash_use_new_config(config_path, clashAuth = None, port = 9090, ip = '127.0
     headers['content-type'] = 'application/json'
     url = 'http://127.0.0.1:9090/configs'
     data = {'path': config_path}
-    status = requests.put(url, json=data, headers=headers)
+    status = ""
+    try:
+        status = requests.put(url, json=data, headers=headers)
+    except:
+        print('clash api连接失败')
+        status = -1
     return status

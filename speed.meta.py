@@ -35,7 +35,7 @@ if __name__ == '__main__':
     node_names = [node['name'] for node in node_list]
     config['proxies'] = []
     for group in config.get('proxy-groups'):
-        if group.get('proxies') is None or node_list[0]['name'] not in group['proxies']:
+        if group.get('proxies') is None or node_list[-1]['name'] not in group['proxies']:
             pass_group.append(group['name'])
         else:
             group['proxies'] = [i for i in group['proxies'] if i not in node_names]
@@ -45,6 +45,6 @@ if __name__ == '__main__':
         for group in config.get('proxy-groups'):
             if group['name'] not in pass_group:
                 group['proxies'].append(config['proxies'][-1]['name'])
-    
+
     save_config(config_path, config)
     clash_use_new_config(config_path, clashAuth = config.get('secret'))
