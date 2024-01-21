@@ -421,6 +421,8 @@ def ConvertsV2Ray(buf):
             trojan["server"] = urlTrojan.hostname
             trojan["port"] = urlTrojan.port
             trojan["password"] = urlTrojan.password
+            if trojan["password"] is None:
+                continue
             trojan["udp"] = True
             trojan["skip-cert-verify"] = bool(
                 strtobool(query.get("allowInsecure")))
@@ -481,7 +483,7 @@ def ConvertsV2Ray(buf):
 
         elif scheme == "vmess":
             try:
-                dcBuf = base64.b64decode(body)
+                dcBuf = base64RawURLDecode(body)
             except:
                 # Xray VMessAEAD share link
                 try:
