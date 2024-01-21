@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding: utf-8
 # 说明 : 本脚本提供批量解析v2ray/ss/ssr/trojan/clash为Clash配置文件,仅供学习交流使用.
 # https://github.com/celetor/convert2clash
