@@ -30,7 +30,7 @@ def get_proxies_recursive(urls):
         print(url)
         if url.startswith('http'):
             try:
-                inputnode = requests.get(url, headers=headers, timeout=5)
+                inputnode = requests.get(url, headers=headers, timeout=10)
                 inputnode.encoding = 'unicode'
                 inputnode = inputnode.text
             except Exception as r:
@@ -47,6 +47,11 @@ def get_proxies_recursive(urls):
             try:
                 yml = yaml.load(inputnode, Loader=yaml.FullLoader)
                 tmp_list = yml.get('proxies')
+                for tmpnode in tmp_list:
+                    if tmpnode['type'] not in supported_nodes:
+                        tmp_list.remove(tmpnode)
+                    elif tmpnode['type'] == 'hy2':
+                        tmpnode['type'] = 'hysteria2'
                 if tmp_list is None:
                     log('clash节点{}为空,提取失败'.format(url))
                     continue

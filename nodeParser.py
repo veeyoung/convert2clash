@@ -4,6 +4,7 @@ import re
 import json
 import base64
 import urllib.parse as urlparse
+import random
 
 # 针对url的base64解码
 def base64RawURLDecode(encoded):
@@ -31,7 +32,7 @@ def strtobool(val):
 
 def RandUserAgent() -> str:
     with open('userAgents.json') as f:
-        return choice(json.load(f))
+        return random.choice(json.load(f))
 
 def uniqueName(names: dict, name):
     index = names.get(name)
@@ -333,7 +334,7 @@ def ConvertsV2Ray(buf):
             hysteria2 = {}
 
             hysteria2["name"] = name
-            hysteria2["type"] = scheme
+            hysteria2["type"] = "hysteria2"
             hysteria2["server"] = urlHysteria2.hostname
             port = get(urlHysteria2.port)
             if port != "":
@@ -415,12 +416,16 @@ def ConvertsV2Ray(buf):
 
             name = uniqueName(names, urlparse.unquote(urlTrojan.fragment))
             trojan = {}
-
-            trojan["name"] = name
-            trojan["type"] = scheme
-            trojan["server"] = urlTrojan.hostname
-            trojan["port"] = urlTrojan.port
-            trojan["password"] = urlTrojan.password
+            try:
+                trojan["name"] = name
+                trojan["type"] = scheme
+                trojan["server"] = urlTrojan.hostname
+                trojan["port"] = urlTrojan.port
+                trojan["password"] = urlTrojan.password
+            except:
+                continue
+            if trojan["password"] is None:
+                trojan["password"] = urlTrojan.username
             if trojan["password"] is None:
                 continue
             trojan["udp"] = True

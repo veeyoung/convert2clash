@@ -1,50 +1,57 @@
-#!/usr/bin/env python
-import os, sys, requests, json
+#!/usr/bin/env python3
+import os
+import sys
+import argparse
+import requests
 from confProcessor import load_local_config, clash_use_new_config, save_config
 
-if __name__ == '__main__':
-    if len(sys.argv) == 3 and sys.argv[2] == '-c':
-        config_path = sys.argv[2]
-    else:
-        config_path = '/home/' + os.getlogin() + '/.config/clash/config.yaml'
-    config = load_local_config(config_path)
+def get_latency(config, headers):
+    clash_api_url = "http://127.0.0.1:9090/proxies"
+    response = requests.get(clash_api_url, headers=headers)
 
-    if len(sys.argv) == 3 and sys.argv[2] == '-c':
-        clash_use_new_config(config_path, clashAuth = config.get('secret'))
-        input('测完速按回车继续')
-
-    headers = dict()
-    if config.get('secret') is not None:
-        headers['Authorization'] = "Bearer " + config['secret']
-    headers['content-type'] = 'application/json'
-    url_clash_api = "http://127.0.0.1:9090/proxies"
-    response_clash = requests.get(url_clash_api,headers = headers)
-
-    latency = dict()
-    for i, j in response_clash.json()['proxies'].items():
-        if j.get('all') is not None or j['alive'] == False or len(j['history']) == 0:
+    latency_info = {}
+    for proxy_name, proxy_info in response.json()['proxies'].items():
+        if proxy_info.get('all') or not proxy_info.get('alive') or not proxy_info.get('history'):
             continue
-        delay = j['history'][-1].get('meanDelay') if j['history'][-1].get('meanDelay') is not None \
-        else j['history'][-1].get('delay')
+        delay = proxy_info['history'][-1].get('meanDelay', proxy_info['history'][-1].get('delay', 0))
         if delay > 0:
-            latency[i] = delay
+            latency_info[proxy_name] = delay
 
-    # 删除原来的节点
+    return latency_info
+
+def update_config(config_path, config, latency_info, top_n):
     pass_group = []
     node_list = config['proxies']
     node_names = [node['name'] for node in node_list]
     config['proxies'] = []
-    for group in config.get('proxy-groups'):
-        if group.get('proxies') is None or node_list[-1]['name'] not in group['proxies']:
+    for group in config.get('proxy-groups', []):
+        if not group.get('proxies') or node_list[-1]['name'] not in group['proxies']:
             pass_group.append(group['name'])
         else:
-            group['proxies'] = [i for i in group['proxies'] if i not in node_names]
+            group['proxies'] = [proxy for proxy in group['proxies'] if proxy not in node_names]
 
-    for i in sorted(latency.items(), key=lambda x: x[1]):
-        config['proxies'].append(node_list[node_names.index(i[0])])
-        for group in config.get('proxy-groups'):
+    sorted_latency = sorted(latency_info.items(), key=lambda x: x[1])[:top_n]
+    for proxy_name, _ in sorted_latency:
+        proxy_index = node_names.index(proxy_name)
+        config['proxies'].append(node_list[proxy_index])
+        for group in config.get('proxy-groups', []):
             if group['name'] not in pass_group:
-                group['proxies'].append(config['proxies'][-1]['name'])
+                group['proxies'].append(proxy_name)
 
     save_config(config_path, config)
-    clash_use_new_config(config_path, clashAuth = config.get('secret'))
+    clash_use_new_config(config_path, clashAuth=config.get('secret'))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Clash配置自动更新')
+    parser.add_argument('-c', '--config', dest='config_path', default='/home/' + os.getlogin() + '/.config/clash/config.yaml', help='Clash配置文件的路径')
+    parser.add_argument('-t', '--top', dest='top_n', type=int, default=-1, help='保留的前n个代理节点')
+    args = parser.parse_args()
+
+    config = load_local_config(args.config_path)
+    headers = {'content-type': 'application/json'}
+    if config.get('secret'):
+        headers['Authorization'] = "Bearer " + config['secret']
+
+    latency_info = get_latency(config, headers)
+
+    update_config(args.config_path, config, latency_info, args.top_n)
