@@ -32,6 +32,9 @@ def load_online_config(url):
         return online_config
 
 def process_dulplicate_invalid_insecure(node_list, option):
+    for node in node_list:
+        if len(node['name']) > 10:
+            node['name'] = node['name'][:10]
     node_num = dict()
     for i in range(len(node_list) - 1, -1, -1):
         if node_list[i].get('name') is None:
