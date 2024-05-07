@@ -568,10 +568,10 @@ def ConvertsV2Ray(buf):
                 host = get(values.get("host"))
                 if host != "":
                     headers["Host"] = host
-                httpOpts["path"] = "/"
+                httpOpts["path"] = ["/"]
                 path = get(values.get("path"))
                 if path != "":
-                    httpOpts["path"] = path
+                    httpOpts["path"] = [path]
                 httpOpts["headers"] = headers
 
                 vmess["http-opts"] = httpOpts
@@ -608,9 +608,12 @@ def ConvertsV2Ray(buf):
             proxies.append(vmess)
 
         elif scheme == "ss":
-            ss = ss_to_clash(body)
-            if ss is not None:
-                proxies.append(ss)
+            try:
+                ss = ss_to_clash(body)
+                if ss is not None:
+                    proxies.append(ss)
+            except:
+                continue
 
         elif scheme == "ssr":
             ssr = ssr_to_clash(body)
