@@ -97,7 +97,10 @@ if __name__ == '__main__':
 
     # 输出路径
     if converter_config.get('output_path') is None or converter_config['output_path'] == 'default':
-        output_path = '/home/' + os.getlogin() + '/.config/clash/config.yaml'
+        try:
+            output_path = '/home/' + os.getlogin() + '/.config/clash/config.yaml'
+        except:
+            pass
     else:
         output_path = converter_config['output_path']
     if args_dict.get('output_path') is not None:
