@@ -16,6 +16,14 @@ def log(msg):
     time = datetime.datetime.now()
     print('[' + time.strftime('%Y.%m.%d-%H:%M:%S') + '] ' + msg)
 
+def test_latency(headers):
+    clash_api_url = "http://127.0.0.1:9090/group/♻️ 自动选择/delay?url=https://www.youtube.com/&timeout=5000"
+    requests.get(clash_api_url, headers=headers)
+
+def del_connections(headers):
+    clash_api_url = "http://127.0.0.1:9090/connections"
+    response = requests.delete(clash_api_url, headers=headers)
+
 # 获取节点:
 def get_proxies_recursive(urls):
     if urls is None or urls == '':
@@ -139,4 +147,6 @@ if __name__ == '__main__':
     log('成功更新{}个节点'.format(len(node_list)))
     print(f'文件已导出至 {output_path}')
     if args_dict.get('output_path') is None:
+        del_connections({'content-type': 'application/json', 'Authorization': config_sample.get('secret')})
         clash_use_new_config(output_path, clashAuth = config_sample.get('secret'))
+        test_latency({'content-type': 'application/json', 'Authorization': config_sample.get('secret')})

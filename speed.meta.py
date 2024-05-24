@@ -4,8 +4,9 @@ import sys
 import argparse
 import requests
 from confProcessor import load_local_config, clash_use_new_config, save_config
+from convertClash import test_latency
 
-def get_latency(config, headers):
+def get_latency(headers):
     clash_api_url = "http://127.0.0.1:9090/proxies"
     response = requests.get(clash_api_url, headers=headers)
 
@@ -41,6 +42,7 @@ def update_config(config_path, config, latency_info, top_n):
     save_config(config_path, config)
     clash_use_new_config(config_path, clashAuth=config.get('secret'))
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Clash配置自动更新')
     parser.add_argument('-c', '--config', dest='config_path', default='/home/' + os.getlogin() + '/.config/clash/config.yaml', help='Clash配置文件的路径')
@@ -52,6 +54,8 @@ if __name__ == '__main__':
     if config.get('secret'):
         headers['Authorization'] = "Bearer " + config['secret']
 
-    latency_info = get_latency(config, headers)
+    test_latency(headers)
+    latency_info = get_latency(headers)
 
     update_config(args.config_path, config, latency_info, args.top_n)
+    test_latency(headers)
