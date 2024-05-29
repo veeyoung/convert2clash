@@ -122,4 +122,10 @@ def clash_use_new_config(config_path, clashAuth = None, port = 9090, ip = '127.0
         status = -1
     return status
 
+def test_latency(headers):
+    clash_api_url = "http://127.0.0.1:9090/group/♻️ 自动选择/delay?url=https://www.youtube.com/&timeout=5000"
+    requests.get(clash_api_url, headers=headers)
 
+def del_connections(headers):
+    clash_api_url = "http://127.0.0.1:9090/connections"
+    response = requests.delete(clash_api_url, headers=headers)

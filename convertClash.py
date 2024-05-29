@@ -7,7 +7,7 @@ import requests, yaml
 import argparse
 
 from nodeParser import ConvertsV2Ray
-from confProcessor import *
+from utils import *
 
 supported_nodes = ['vmess://', 'ss://', 'ssr://', 'trojan://', 'vless://', 'hysteria://', 'hysteria2://', 'hy2://', 'tuic://', 'tg://']
 
@@ -15,14 +15,6 @@ supported_nodes = ['vmess://', 'ss://', 'ssr://', 'trojan://', 'vless://', 'hyst
 def log(msg):
     time = datetime.datetime.now()
     print('[' + time.strftime('%Y.%m.%d-%H:%M:%S') + '] ' + msg)
-
-def test_latency(headers):
-    clash_api_url = "http://127.0.0.1:9090/group/♻️ 自动选择/delay?url=https://www.youtube.com/&timeout=5000"
-    requests.get(clash_api_url, headers=headers)
-
-def del_connections(headers):
-    clash_api_url = "http://127.0.0.1:9090/connections"
-    response = requests.delete(clash_api_url, headers=headers)
 
 # 获取节点:
 def get_proxies_recursive(urls):

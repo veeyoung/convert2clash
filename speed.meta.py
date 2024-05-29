@@ -3,8 +3,8 @@ import os
 import sys
 import argparse
 import requests
-from confProcessor import load_local_config, clash_use_new_config, save_config
-from convertClash import test_latency
+from utils import load_local_config, clash_use_new_config, save_config
+from utils import test_latency
 
 def get_latency(headers):
     clash_api_url = "http://127.0.0.1:9090/proxies"
