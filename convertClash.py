@@ -22,7 +22,7 @@ def get_proxies_recursive(urls):
         return None
     url_list = urls.split(';')
     headers = {
-        'User-Agent': 'V2ray'
+        'User-Agent': 'V2ray,clash meta'
     }
     proxy_list = list()
     for url in url_list:
@@ -121,7 +121,7 @@ if __name__ == '__main__':
         log('未发现节点')
         sys.exit(0)
 
-    node_num = process_dulplicate_invalid_insecure(node_list, converter_config)
+    node_num, node_list = process_node(node_list, converter_config)
 
     message = '发现:'
     for k, v in node_num.items():
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     save_config(output_path, final_config)
     log('成功更新{}个节点'.format(len(node_list)))
     print(f'文件已导出至 {output_path}')
-    if args_dict.get('output_path') is None:
+    if args_dict.get('output_path') is None and converter_config["use_api"]:
         del_connections({'content-type': 'application/json', 'Authorization': config_sample.get('secret')})
         clash_use_new_config(output_path, clashAuth = config_sample.get('secret'))
         test_latency({'content-type': 'application/json', 'Authorization': config_sample.get('secret')})

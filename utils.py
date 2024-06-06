@@ -31,38 +31,35 @@ def load_online_config(url):
     finally:
         return online_config
 
-def process_dulplicate_invalid_insecure(node_list, option):
+def process_node(node_list, option):
+    # Truncate node names longer than 10 characters
     for node in node_list:
-        if len(node['name']) > 10:
-            node['name'] = node['name'][:10]
-    node_num = dict()
-    for i in range(len(node_list) - 1, -1, -1):
-        if node_list[i].get('name') is None:
-            node_list[i]['name'] = str(i)
-        if any(node_list[i]['name'].find(name) > -1 for name in option['invalid_node_name']) or \
-        ( node_list[i].get('skip-cert-verify') is not None and not option['allow_insecure_node'] ):
-            node_list.pop(i)
+        node['name'] = node['name'][:10]
 
-    #删除重复节点
-    origin_len = len(node_list)
-    for i in range(origin_len - 1, -1, -1):
-        flag = True
-        for j in range(i):
-            if node_list[j]['name'] == node_list[i]['name']:
-                node_list[i]['name'] += str(i)
-            if node_list[j]['type'] == node_list[i]['type'] and node_list[j]['server'] == node_list[i]['server'] \
-            and node_list[j]['port'] == node_list[i]['port'] and (not option['keep_dulplicate'] or \
-            (node_list[j].get('password') == node_list[i].get('password') and node_list[j].get('uuid') == node_list[i].get('uuid'))):
-                node_list.pop(i)
-                flag = False
-                break
-        if flag:
-            if node_num.get(node_list[i]['type']) is None:
-                node_num[node_list[i]['type']] = 1
-            else:
-                node_num[node_list[i]['type']] += 1
+    # Remove nodes with invalid names or insecure configurations
+    node_list = [node for node in node_list if
+                all(node['name'].find(name) == -1 for name in option['invalid_node_name']) and
+                 (not node.get('skip-cert-verify') or option['allow_insecure_node'])]
 
-    return node_num
+    # Remove duplicate nodes
+    node_counts = {}
+    unique_nodes = []
+    unique_names = []
+    updated_node_list = []
+    i = 0
+    for node in node_list:
+        node_key = (node['type'], node['server'], node['port'], node.get('password'), node.get('uuid'), node.get("ws-opts"))
+        if node_key not in unique_nodes:
+            while node["name"] in unique_names:
+                node["name"] += str(i)
+                i += 1
+            unique_names.append(node["name"])
+            unique_nodes.append(node_key)
+            node_counts[node['type']] = node_counts.get(node['type'], 0) + 1
+            updated_node_list.append(node)
+
+    return node_counts, updated_node_list
+
 
 # 将代理添加到配置文件
 def add_proxies_to_model(data, model, option):
@@ -124,8 +121,14 @@ def clash_use_new_config(config_path, clashAuth = None, port = 9090, ip = '127.0
 
 def test_latency(headers):
     clash_api_url = "http://127.0.0.1:9090/group/♻️ 自动选择/delay?url=https://www.youtube.com/&timeout=5000"
-    requests.get(clash_api_url, headers=headers)
+    try:
+        requests.get(clash_api_url, headers=headers)
+    except:
+        print('clash api连接失败')
 
 def del_connections(headers):
     clash_api_url = "http://127.0.0.1:9090/connections"
-    response = requests.delete(clash_api_url, headers=headers)
+    try:
+        requests.delete(clash_api_url, headers=headers)
+    except:
+        print('clash api连接失败')
