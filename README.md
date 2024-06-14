@@ -13,7 +13,8 @@
     "authentication": false,
     "allow_insecure_node": true,
     "keep_dulplicate": true,
-    "backup": false
+    "backup": false,
+    "use_api": true
 }
 ```
 1. invalid_node_name,跳过无效的节点
@@ -26,6 +27,7 @@
 8. allow_insecure_node,是否允许不安全的节点
 9. keep_dulplicate是否保存节点相同但用户信息不同的节点,适用于一个机场拥有多个订阅
 10. 输出前是否备份原文件,备份到backup文件夹
+11. 采用clash api更新配置
 
 #### 使用说明:
      1. 先执行pip install -r requirements.txt
