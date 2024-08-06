@@ -1,0 +1,14 @@
+{
+    "invalid_node_name": ["剩余流量", "套餐到期", "距离下次"],
+    "pass_group": ["🎯 全球直连", "🛑 全球拦截", "🍃 应用净化", "🤝 Relay"],
+    "sample_path": "./samples/sample.yaml",
+    "sample_url": "https://github.gogodoge66.eu.org/https://raw.githubusercontent.com/veeyoung/somescripts/main/sample.yaml",
+    "output_path": "default",
+    "secret": true,
+    "authentication": false,
+    "allow_insecure_node": true,
+    "keep_dulplicate": true,
+    "backup": false,
+    "use_api": true,
+    "api_port": 9090
+}
